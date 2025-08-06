@@ -53,15 +53,14 @@ echo "Updating systemd service..."
 sudo tee /etc/systemd/system/fusetester.service > /dev/null <<EOF
 [Unit]
 Description=FuseTester Node.js Application
-After=network.target
+After=network.target pigpiod.service
+Requires=pigpiod.service
 
 [Service]
 Type=simple
 User=pi
 WorkingDirectory=/opt/fusetester
-Environment=NVM_DIR=/home/pi/.nvm
-ExecStartPre=/bin/bash -c 'source /home/pi/.nvm/nvm.sh && nvm use 24.5.0'
-ExecStart=/bin/bash -c 'source /home/pi/.nvm/nvm.sh && nvm use 24.5.0 && node src/main.js'
+ExecStart=$(which node) src/main.js
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production

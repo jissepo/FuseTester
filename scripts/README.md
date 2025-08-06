@@ -91,6 +91,8 @@ All scripts expect **Node.js 24.5 LTS** to be installed via **NVM**:
 
 **Important:** Always run `nvm use 24.5.0` before executing scripts!
 
+The systemd service will use the Node.js version that was active when the script was run.
+
 ## Systemd Service
 
 The scripts create a systemd service (`fusetester.service`) that:
