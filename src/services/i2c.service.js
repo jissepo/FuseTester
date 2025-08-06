@@ -7,7 +7,7 @@
 let pigpio;
 try {
   pigpio = require("pigpio");
-} catch (error) {
+} catch {
   console.warn("pigpio not available - I2C functionality disabled");
   pigpio = null;
 }
@@ -232,50 +232,6 @@ class I2CService {
       );
       throw error;
     }
-  }
-
-  /**
-   * Scan for connected I2C devices
-   * @param {number} bus - I2C bus to scan (default: 1)
-   */
-  async scanDevices(bus = 1) {
-    console.log(`Scanning I2C bus ${bus} for devices...`);
-    const foundDevices = [];
-
-    // Scan addresses 0x03 to 0x77 (valid 7-bit I2C addresses)
-    for (let addr = 0x03; addr <= 0x77; addr++) {
-      try {
-        const i2c = pigpio.i2c(bus, addr);
-
-        // Try to read a byte to test if device responds
-        await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error("Timeout"));
-          }, 100);
-
-          i2c.read(1, (error, data) => {
-            clearTimeout(timeout);
-            if (error) {
-              reject(error);
-            } else {
-              resolve(data);
-            }
-          });
-        });
-
-        foundDevices.push(addr);
-        i2c.close();
-      } catch (error) {
-        // Device not found at this address - this is normal
-      }
-    }
-
-    console.log(
-      `Found I2C devices at addresses: ${foundDevices
-        .map((addr) => `0x${addr.toString(16)}`)
-        .join(", ")}`
-    );
-    return foundDevices;
   }
 
   /**

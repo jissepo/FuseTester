@@ -6,7 +6,7 @@
 let pigpio;
 try {
   pigpio = require("pigpio");
-} catch (error) {
+} catch {
   console.warn("pigpio not available - GPIO functionality disabled");
   pigpio = null;
 }
@@ -287,11 +287,7 @@ class GPIOService {
         // Disable all muxes
         this.disableAllMux();
 
-        // Clean up GPIO pins
-        for (const pin of Object.values(this.gpioPins)) {
-          // pigpio pins are cleaned up automatically on termination
-        }
-
+        // Clean up GPIO pins - they are cleaned up automatically on termination
         this.gpioPins = {};
         this.initialized = false;
         console.log("GPIO service shutdown complete");

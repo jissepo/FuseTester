@@ -275,43 +275,6 @@ class CSVLogger {
   getCurrentFileSize() {
     return this.fileSize;
   }
-
-  /**
-   * Manual file rotation (for testing or maintenance)
-   */
-  async manualRotate() {
-    if (this.initialized) {
-      await this.rotateFile();
-    }
-  }
-
-  /**
-   * Create backup of current CSV file
-   */
-  async createBackup() {
-    try {
-      if (!this.initialized || !fs.existsSync(this.filePath)) {
-        throw new Error("No CSV file to backup");
-      }
-
-      const ext = path.extname(this.filePath);
-      const baseName = path.basename(this.filePath, ext);
-      const dir = path.dirname(this.filePath);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const backupPath = path.join(
-        dir,
-        `${baseName}_backup_${timestamp}${ext}`
-      );
-
-      fs.copyFileSync(this.filePath, backupPath);
-      console.log(`Backup created: ${backupPath}`);
-
-      return backupPath;
-    } catch (error) {
-      console.error("Error creating backup:", error);
-      throw error;
-    }
-  }
 }
 
 // Export singleton instance
