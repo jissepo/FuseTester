@@ -1,0 +1,17 @@
+# Core hardware libraries for Raspberry Pi 1 B+
+RPi.GPIO>=0.7.1                           # GPIO control for multiplexer management
+adafruit-circuitpython-ads1x15>=2.2.0     # ADS1115 ADC interface
+adafruit-blinka>=8.0.0                    # CircuitPython compatibility layer
+smbus2>=0.4.0                            # Alternative I2C communication
+
+# System and utility libraries
+python-dotenv>=1.0.0                     # Environment variable management
+psutil>=5.9.0                           # System resource monitoring
+
+# Optional libraries (memory permitting on Pi 1 B+)
+pandas>=1.5.0                           # Advanced CSV operations (if sufficient memory)
+pigpio>=1.78                            # Alternative GPIO/I2C library for advanced features
+
+# Development and testing (not required for production)
+pytest>=7.0.0                          # Testing framework
+pytest-mock>=3.10.0                    # Mock library for testing

@@ -231,9 +231,9 @@ sudo journalctl -u fusetester.service --no-pager -l
 # Check file permissions
 ls -la /opt/fusetester
 
-# Verify Node.js installation
-which node
-node --version
+# Verify Python installation
+python3 --version
+which python3
 ```
 
 #### CSV File Issues

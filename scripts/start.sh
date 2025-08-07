@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # FuseTester Startup Script
-# Starts the fuse monitoring application using Node.js 24.5 via NVM
+# Starts the fuse monitoring application using Python 3.9+
 #
 # Prerequisites:
-# - NVM installed with Node.js 24.5
-# - Project dependencies installed
-# - I2C and pigpio properly configured
+# - Python 3.9+ installed
+# - Virtual environment created and dependencies installed
+# - I2C interface enabled and configured
 #
 # Usage: ./scripts/start.sh
 
@@ -14,20 +14,28 @@ set -e
 
 echo "Starting FuseTester..."
 
-# Load NVM and use Node.js 24.5
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+# Activate Python virtual environment
+if [ -d "venv" ]; then
+    source venv/bin/activate
+    echo "Activated Python virtual environment"
+else
+    echo "Warning: Virtual environment not found, using system Python"
+fi
 
-# Ensure we're using Node.js 24.5
-nvm use 24.5.0
-
-# Verify Node.js version
-echo "Using Node.js version: $(node --version)"
+# Verify Python version
+PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+echo "Using Python version: $PYTHON_VERSION"
 
 # Check if running on Pi
-if [[ $(uname -m) != "armv6l" ]]; then
-    echo "Warning: Not running on ARM6 architecture"
+ARCH=$(uname -m)
+echo "Architecture: $ARCH"
+
+if [[ "$ARCH" == "armv6l" ]]; then
+    echo "✓ Running on Raspberry Pi 1 B+ (ARM6)"
+elif [[ "$ARCH" == "armv7l" || "$ARCH" == "aarch64" ]]; then
+    echo "Running on newer Pi architecture: $ARCH"
+else
+    echo "Warning: Not running on ARM architecture"
 fi
 
 # Check available memory
@@ -38,8 +46,21 @@ if [ "$AVAILABLE_MEM" -lt 100 ]; then
     echo "Warning: Low available memory (${AVAILABLE_MEM}MB)"
 fi
 
-# Set environment
-export NODE_ENV=${NODE_ENV:-production}
+# Set Python path
+export PYTHONPATH="${PWD}/src:${PYTHONPATH}"
+
+# Set default environment variables
+export LOG_LEVEL=${LOG_LEVEL:-INFO}
+export I2C_ENABLED=${I2C_ENABLED:-true}
+export DATA_COLLECTION_INTERVAL=${DATA_COLLECTION_INTERVAL:-5.0}
+export CSV_FILE_PATH=${CSV_FILE_PATH:-./data/fuse_data.csv}
+export MEMORY_MONITORING=${MEMORY_MONITORING:-true}
+
+echo "Environment configured:"
+echo "  LOG_LEVEL=$LOG_LEVEL"
+echo "  I2C_ENABLED=$I2C_ENABLED"
+echo "  DATA_COLLECTION_INTERVAL=${DATA_COLLECTION_INTERVAL}s"
+echo "  CSV_FILE_PATH=$CSV_FILE_PATH"
 
 # Start the application
-exec node src/main.js
+exec python3 src/main.py

@@ -1,14 +1,12 @@
 #!/bin/bash
 
 # FuseTester Deployment Script for Raspberry Pi
-# Deploys the application to /opt/fusetester and creates systemd service
-# Uses Node.js 24.5 via NVM
+# Deploys the Python application to /opt/fusetester and creates systemd service
 #
 # Prerequisites:
-# - NVM and Node.js 24.5 already installed on target system
+# - Python 3.9+ already installed on target system
 # - User 'pi' with sudo privileges  
-# - pigpio daemon configured
-# - Run 'nvm use 24.5.0' before executing this script
+# - I2C interface enabled
 #
 # Usage: ./scripts/deploy.sh
 
@@ -34,36 +32,59 @@ sudo mkdir -p /opt/fusetester
 sudo cp -r . /opt/fusetester/
 sudo chown -R pi:pi /opt/fusetester
 
-# Install dependencies
-echo "Installing dependencies..."
+# Setup Python environment
+echo "Setting up Python environment..."
 cd /opt/fusetester
 
-# Verify Node.js is available (should be managed by NVM)
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js not found. Please ensure NVM and Node.js 24.5 are installed:"
-    echo "   Please run: nvm use 24.5.0"
+# Verify Python version
+PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+REQUIRED_VERSION="3.9"
+
+if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" = "$REQUIRED_VERSION" ]; then
+    echo "✓ Using Python version: $PYTHON_VERSION"
+else
+    echo "❌ Python version $PYTHON_VERSION is too old. Requires Python 3.9 or higher"
     exit 1
 fi
 
-echo "✓ Using Node.js version: $(node --version)"
-npm install --production --unsafe-perm
+# Create virtual environment
+echo "Creating Python virtual environment..."
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+echo "Installing Python dependencies..."
+pip install --upgrade pip
+pip install -r requirements.txt
 
 # Update systemd service
 echo "Updating systemd service..."
 sudo tee /etc/systemd/system/fusetester.service > /dev/null <<EOF
 [Unit]
-Description=FuseTester Node.js Application
-After=network.target pigpiod.service
-Requires=pigpiod.service
+Description=FuseTester 64-Fuse Monitoring System (Python)
+After=network.target
+Wants=network.target
 
 [Service]
 Type=simple
 User=pi
+Group=gpio
 WorkingDirectory=/opt/fusetester
-ExecStart=$(which node) src/main.js
+Environment=PATH=/opt/fusetester/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/opt/fusetester/venv/bin/python3 src/main.py
 Restart=always
 RestartSec=10
-Environment=NODE_ENV=production
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables
+Environment=PYTHONPATH=/opt/fusetester/src
+Environment=LOG_LEVEL=INFO
+Environment=I2C_ENABLED=true
+Environment=DATA_COLLECTION_INTERVAL=5000
+Environment=CSV_FILE_PATH=/opt/fusetester/data/fuse_data.csv
+Environment=CSV_MAX_FILE_SIZE=52428800
+Environment=MEMORY_MONITORING=true
 
 [Install]
 WantedBy=multi-user.target

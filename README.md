@@ -1,29 +1,21 @@
 # FuseTester
 
-I2C data collection and CSV logging application for Raspberry Pi 1 Model B+ with Pi OS.
+64-fuse monitoring system for Raspberry Pi 1 Model B+ using Python, I2C ADC, and GPIO multiplexers.
 
 ## Hardware Requirements
 
-- Raspberry Pi 1 Model B+
-- ARM6 (armv6l) architecture
-- 512MB RAM
+- Raspberry Pi 1 Model B+ (ARM6 armv6l architecture)
+- 512MB RAM 
 - MicroSD card (8GB+ recommended)
-- Pi OS (Raspberry Pi OS)
-- I2C devices for data collection
+- Pi OS (Raspberry Pi OS) with Python 3.9+
+- Hardware components:
+  - ADS1115 16-bit I2C ADC
+  - 4x CD74HC4067M 16-channel analog multiplexers
+  - GPIO connections for multiplexer control
 
 ## Quick Start
 
-**Prerequisites:** Install NVM and Node.js 24.5 first:
-```bash
-# Install NVM
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-source ~/.bashrc
-
-# Install Node.js 24.5 (ARM6 compatible)
-nvm install 24.5.0
-nvm use 24.5.0
-nvm alias default 24.5.0
-```
+**No additional software installation required** - Python 3.9+ comes pre-installed on Pi OS.
 
 1. Clone this repository to your Raspberry Pi:
 ```bash
@@ -33,7 +25,6 @@ cd FuseTester
 
 2. Run the installation script:
 ```bash
-nvm use 24.5.0  # Ensure correct Node.js version
 chmod +x scripts/install.sh
 ./scripts/install.sh
 ```
@@ -88,10 +79,10 @@ sudo systemctl enable fusetester.service
 All configuration is handled through the `.env` file:
 
 - `I2C_ENABLED` - Enable/disable I2C functionality
-- `DATA_COLLECTION_INTERVAL` - Data collection frequency (milliseconds)  
+- `DATA_COLLECTION_INTERVAL` - Data collection frequency (seconds)  
 - `CSV_FILE_PATH` - Path to CSV data file
 - `CSV_MAX_FILE_SIZE` - CSV file size limit for rotation (bytes)
-- `LOG_LEVEL` - Logging level (info, debug, error)
+- `LOG_LEVEL` - Logging level (INFO, DEBUG, ERROR)
 - `MEMORY_MONITORING` - Enable memory usage logging
 
 ## Fuse Monitoring System
@@ -102,7 +93,7 @@ This application monitors 64 fuses using:
 - **GPIO pins** for multiplexer control (S0=27, S1=17, S2=24, S3=23)
 - **CSV logging** with automatic file rotation
 
-Data is collected every 5 seconds and logged with the format:
+Data is collected every 5 seconds (configurable) and logged with the format:
 ```
 timestamp,fuse 1,fuse 2,fuse 3,...,fuse 64
 ```
@@ -129,24 +120,38 @@ The application continuously monitors all 64 fuses and logs voltage readings to 
 
 ### Local Development (Not on Pi)
 ```bash
-npm install
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
 cp .env.example .env
+
 # Note: Hardware-specific features won't work without Pi hardware
-node src/main.js
-# OR use npm script:
-npm start
+python3 src/main.py
 ```
 
-**Note:** `npm start` is only for development/testing. On the Pi, use the systemd service instead.
+**Note:** Direct Python execution is only for development/testing. On the Pi, use the systemd service instead.
+
+### Hardware Libraries Used
+
+- **RPi.GPIO**: GPIO control for multiplexer management
+- **adafruit-circuitpython-ads1x15**: ADS1115 ADC interface  
+- **adafruit-blinka**: CircuitPython compatibility layer
+- **smbus2**: Alternative I2C communication
+- **psutil**: System resource monitoring
 
 ### Monitoring
 
 The application includes built-in monitoring for:
 - Memory usage (critical for Pi 1 B+ with 512MB RAM)
-- System health
-- CSV file sizes
-- I2C device status
-- GPIO pin states
+- System health and resource usage
+- CSV file sizes and rotation
+- I2C device connectivity and status
+- GPIO pin states and multiplexer control
 
 ## Scripts
 
