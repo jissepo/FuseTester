@@ -9,7 +9,7 @@ This directory contains deployment and management scripts for the FuseTester Pyt
 - ✅ Raspberry Pi OS (Pi OS) installed  
 - ✅ Python 3.9+ (pre-installed on Pi OS)
 - ✅ Internet connection available
-- ✅ User 'pi' has sudo privileges
+- ✅ User 'garage' has sudo privileges
 - ✅ SSH access configured (if deploying remotely)
 
 **No additional language runtime installation required** - Python 3.9+ comes pre-installed on Raspberry Pi OS.
@@ -28,7 +28,6 @@ System installation script that:
 **Usage:**
 ```bash
 # Run the installer
-./scripts/install.sh
 chmod +x scripts/install.sh
 ./scripts/install.sh
 ```
@@ -75,7 +74,7 @@ The scripts create a systemd service (`fusetester.service`) that:
 - Automatically starts on boot
 - Restarts on failure  
 - Uses Python virtual environment
-- Runs as the 'pi' user with GPIO group access
+- Runs as the 'garage' user with GPIO group access
 - Has access to I2C interface
 
 **Service Commands:**
@@ -136,7 +135,7 @@ source venv/bin/activate
 **GPIO Permission Issues:**
 ```bash
 # Add user to gpio group
-sudo usermod -a -G gpio pi
+sudo usermod -a -G gpio garage
 
 # Reboot to apply changes
 sudo reboot

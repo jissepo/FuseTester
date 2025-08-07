@@ -5,7 +5,7 @@
 #
 # Prerequisites:
 # - Python 3.9+ already installed on target system
-# - User 'pi' with sudo privileges  
+# - User 'garage' with sudo privileges  
 # - I2C interface enabled
 #
 # Usage: ./scripts/deploy.sh
@@ -30,7 +30,7 @@ fi
 echo "Copying files..."
 sudo mkdir -p /opt/fusetester
 sudo cp -r . /opt/fusetester/
-sudo chown -R pi:pi /opt/fusetester
+sudo chown -R garage:garage /opt/fusetester
 
 # Setup Python environment
 echo "Setting up Python environment..."
@@ -67,7 +67,7 @@ Wants=network.target
 
 [Service]
 Type=simple
-User=pi
+User=garage
 Group=gpio
 WorkingDirectory=/opt/fusetester
 Environment=PATH=/opt/fusetester/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

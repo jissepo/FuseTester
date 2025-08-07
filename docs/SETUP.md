@@ -113,7 +113,7 @@ sudo systemctl status pigpiod
 cd /opt
 sudo git clone <your-repo-url> fusetester
 cd fusetester
-sudo chown -R pi:pi /opt/fusetester
+sudo chown -R garage:garage /opt/fusetester
 ```
 
 ### 2. Run Installation Script
@@ -220,7 +220,7 @@ ls /dev/i2c*
 sudo i2cdetect -y 1
 
 # Check permissions
-sudo usermod -a -G gpio,i2c pi
+sudo usermod -a -G gpio,i2c garage
 ```
 
 #### Service Won't Start
@@ -266,7 +266,7 @@ sudo ufw allow ssh
 ### File Permissions
 ```bash
 # Ensure proper ownership
-sudo chown -R pi:pi /opt/fusetester
+sudo chown -R garage:garage /opt/fusetester
 
 # Make scripts executable
 chmod +x /opt/fusetester/scripts/*.sh

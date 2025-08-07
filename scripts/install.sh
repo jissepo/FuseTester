@@ -6,7 +6,7 @@
 # Prerequisites:
 # - Raspberry Pi OS (Pi OS) 
 # - Internet connection
-# - User 'pi' with sudo privileges
+# - User 'garage' with sudo privileges
 # - Python 3.9+ (pre-installed on Pi OS)
 #
 # This script will:
@@ -121,7 +121,7 @@ Wants=network.target
 
 [Service]
 Type=simple
-User=pi
+User=garage
 Group=gpio
 WorkingDirectory=$(pwd)
 Environment=PATH=$(pwd)/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
