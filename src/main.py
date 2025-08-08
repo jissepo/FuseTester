@@ -33,14 +33,20 @@ def setup_logging():
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
     
+    # Create handlers
+    file_handler = logging.FileHandler('logs/fusetester.log')
+    error_handler = logging.FileHandler('logs/error.log')
+    error_handler.setLevel(logging.ERROR)  # Only log errors and above
+    console_handler = logging.StreamHandler(sys.stdout)
+    
     # Configure logging format
     logging.basicConfig(
         level=getattr(logging, log_level),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('logs/fusetester.log'),
-            logging.FileHandler('logs/error.log', level=logging.ERROR),
-            logging.StreamHandler(sys.stdout)
+            file_handler,
+            error_handler,
+            console_handler
         ]
     )
     
