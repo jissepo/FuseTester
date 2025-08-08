@@ -80,8 +80,11 @@ All configuration is handled through the `.env` file:
 
 - `I2C_ENABLED` - Enable/disable I2C functionality
 - `DATA_COLLECTION_INTERVAL` - Data collection frequency (seconds)  
-- `CSV_FILE_PATH` - Path to CSV data file
-- `CSV_MAX_FILE_SIZE` - CSV file size limit for rotation (bytes)
+- `SERVER_URL` - HTTP endpoint for data transmission
+- `API_KEY` - Authentication key for HTTP requests
+- `DEVICE_ID` - Unique identifier for this device
+- `HTTP_TIMEOUT` - HTTP request timeout (seconds)
+- `MAX_BUFFER_SIZE` - Number of readings to buffer when offline
 - `LOG_LEVEL` - Logging level (INFO, DEBUG, ERROR)
 - `MEMORY_MONITORING` - Enable memory usage logging
 
@@ -91,7 +94,7 @@ This application monitors 64 fuses using:
 - **4 CD74HC4067M multiplexers** (16 channels each)
 - **1 ADS1115 16-bit ADC** (I2C address 0x48)
 - **GPIO pins** for multiplexer control (S0=27, S1=17, S2=24, S3=23)
-- **CSV logging** with automatic file rotation
+- **HTTP data transmission** with offline fallback buffer
 
 Data is collected every 5 seconds (configurable) and logged with the format:
 ```
@@ -100,21 +103,22 @@ timestamp,fuse 1,fuse 2,fuse 3,...,fuse 64
 
 ## Data Collection
 
-The application continuously monitors all 64 fuses and logs voltage readings to CSV files. The monitoring cycle:
+The application continuously monitors all 64 fuses and transmits voltage readings via HTTP POST requests to an external server. The monitoring cycle:
 
 1. Select multiplexer (0-3)
 2. Select channel on multiplexer (0-15) 
 3. Read voltage from ADS1115 ADC
-4. Log data to CSV file
+4. Transmit data via HTTP POST to external server
 5. Clean variables for memory optimization
 6. Repeat for all 64 channels
 
 ## File Management
 
-- CSV files are automatically rotated when size limit is reached
-- All data files are stored in the `data/` directory
-- Rotated files include timestamp in filename
+- Data transmission includes automatic retry with exponential backoff
+- When HTTP server is unreachable, data is buffered in memory for later transmission
+- Buffer has configurable size limit to prevent memory exhaustion on Pi 1 B+
 - Log files stored in `logs/` directory
+- No local data files - all fuse readings transmitted via HTTP
 
 ## Development
 
@@ -149,7 +153,7 @@ python3 src/main.py
 The application includes built-in monitoring for:
 - Memory usage (critical for Pi 1 B+ with 512MB RAM)
 - System health and resource usage
-- CSV file sizes and rotation
+- HTTP transmission status and buffer usage
 - I2C device connectivity and status
 - GPIO pin states and multiplexer control
 

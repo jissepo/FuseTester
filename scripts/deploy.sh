@@ -81,9 +81,11 @@ StandardError=journal
 Environment=PYTHONPATH=/opt/fusetester/src
 Environment=LOG_LEVEL=INFO
 Environment=I2C_ENABLED=true
-Environment=DATA_COLLECTION_INTERVAL=5000
-Environment=CSV_FILE_PATH=/opt/fusetester/data/fuse_data.csv
-Environment=CSV_MAX_FILE_SIZE=52428800
+Environment=DATA_COLLECTION_INTERVAL=5.0
+Environment=SERVER_URL=https://your-server.com/api/fuse-data
+Environment=DEVICE_ID=fusetester-001
+Environment=HTTP_TIMEOUT=10
+Environment=MAX_BUFFER_SIZE=100
 Environment=MEMORY_MONITORING=true
 
 [Install]

@@ -100,8 +100,8 @@ sudo systemctl enable fusetester.service
 The Python conversion uses dedicated hardware libraries:
 - **RPi.GPIO**: GPIO control for multiplexer management
 - **adafruit-circuitpython-ads1x15**: ADS1115 ADC interface
-- **adafruit-blinka**: CircuitPython compatibility layer
-- **smbus2**: Alternative I2C communication
+- **adafruit-blinka**: CircuitPython compatibility layer (provides I2C via busio)
+- **requests**: HTTP data transmission to external server
 
 ## Troubleshooting
 

@@ -53,14 +53,18 @@ export PYTHONPATH="${PWD}/src:${PYTHONPATH}"
 export LOG_LEVEL=${LOG_LEVEL:-INFO}
 export I2C_ENABLED=${I2C_ENABLED:-true}
 export DATA_COLLECTION_INTERVAL=${DATA_COLLECTION_INTERVAL:-5.0}
-export CSV_FILE_PATH=${CSV_FILE_PATH:-./data/fuse_data.csv}
+export SERVER_URL=${SERVER_URL:-https://your-server.com/api/fuse-data}
+export DEVICE_ID=${DEVICE_ID:-fusetester-001}
+export HTTP_TIMEOUT=${HTTP_TIMEOUT:-10}
+export MAX_BUFFER_SIZE=${MAX_BUFFER_SIZE:-100}
 export MEMORY_MONITORING=${MEMORY_MONITORING:-true}
 
 echo "Environment configured:"
 echo "  LOG_LEVEL=$LOG_LEVEL"
 echo "  I2C_ENABLED=$I2C_ENABLED"
 echo "  DATA_COLLECTION_INTERVAL=${DATA_COLLECTION_INTERVAL}s"
-echo "  CSV_FILE_PATH=$CSV_FILE_PATH"
+echo "  SERVER_URL=$SERVER_URL"
+echo "  DEVICE_ID=$DEVICE_ID"
 
 # Start the application
 exec python3 src/main.py

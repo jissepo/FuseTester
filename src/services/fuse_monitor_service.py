@@ -1,6 +1,6 @@
 """
 Fuse Monitor Service
-Coordinates GPIO, ADS1115 ADC, and CSV logging for 64-fuse monitoring system
+Coordinates GPIO, ADS1115 ADC, and HTTP data transmission for 64-fuse monitoring system
 Optimized for Raspberry Pi 1 Model B+ ARM6 architecture
 """
 
@@ -12,7 +12,7 @@ from datetime import datetime
 
 from .gpio_service import GPIOService
 from .ads1115_service import ADS1115Service
-from .csv_logger import CSVLogger
+from .csv_logger import HTTPDataSender
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class FuseMonitorService:
         # Service instances
         self.gpio_service: Optional[GPIOService] = None
         self.ads1115_service: Optional[ADS1115Service] = None
-        self.csv_logger: Optional[CSVLogger] = None
+        self.http_sender: Optional[HTTPDataSender] = None
         
         # Monitoring configuration
         self.data_collection_interval = 5.0  # seconds
@@ -61,14 +61,10 @@ class FuseMonitorService:
             self.ads1115_service.set_gain('6.144V')  # +/-6.144V range for 0-5V fuse signals
             logger.info("ADS1115 ADC ready")
             
-            # Initialize CSV logger
-            csv_file_path = os.getenv('CSV_FILE_PATH', './data/fuse_data.csv')
-            self.csv_logger = CSVLogger()
-            await self.csv_logger.initialize(csv_file_path)
-            
-            # Write CSV headers for all 64 fuses
-            await self._ensure_csv_headers()
-            logger.info("CSV logger ready")
+            # Initialize HTTP data sender
+            self.http_sender = HTTPDataSender()
+            await self.http_sender.initialize()
+            logger.info("HTTP data sender ready")
             
             # Get monitoring configuration
             self.data_collection_interval = float(os.getenv('DATA_COLLECTION_INTERVAL', 5.0))
@@ -81,22 +77,6 @@ class FuseMonitorService:
         except Exception as e:
             logger.error(f"Failed to initialize Fuse Monitor Service: {e}")
             await self.cleanup()
-            raise
-    
-    async def _ensure_csv_headers(self):
-        """Ensure CSV file has proper headers for all 64 fuses"""
-        try:
-            headers = ['timestamp']
-            
-            # Add headers for all 64 fuses
-            for fuse_num in range(1, self.total_fuses + 1):
-                headers.append(f'fuse {fuse_num}')
-            
-            await self.csv_logger.write_headers(headers)
-            logger.info(f"CSV headers configured for {self.total_fuses} fuses")
-            
-        except Exception as e:
-            logger.error(f"Failed to configure CSV headers: {e}")
             raise
     
     async def test_system(self) -> Dict[str, Any]:
@@ -112,7 +92,7 @@ class FuseMonitorService:
         test_results = {
             'gpio': False,
             'adc': False,
-            'csv': False,
+            'http': False,
             'fuse_test': {},
             'error': None,
             'timestamp': datetime.now().isoformat()
@@ -131,10 +111,10 @@ class FuseMonitorService:
             test_results['adc'] = adc_test.get('connection', False)
             test_results['adc_details'] = adc_test
             
-            # Test CSV logger
-            csv_status = await self.csv_logger.get_status()
-            test_results['csv'] = csv_status.get('initialized', False)
-            test_results['csv_details'] = csv_status
+            # Test HTTP data sender
+            http_status = await self.http_sender.get_status()
+            test_results['http'] = http_status.get('initialized', False)
+            test_results['http_details'] = http_status
             
             # Test a few sample fuses
             if test_results['gpio'] and test_results['adc']:
@@ -226,8 +206,8 @@ class FuseMonitorService:
                 # Collect data from all fuses
                 fuse_data = await self._collect_all_fuse_data()
                 
-                # Log to CSV
-                await self.csv_logger.log_fuse_readings(fuse_data)
+                # Send data via HTTP
+                await self.http_sender.log_fuse_readings(fuse_data)
                 
                 # Calculate actual collection time
                 collection_time = asyncio.get_event_loop().time() - start_time
@@ -336,8 +316,8 @@ class FuseMonitorService:
         if self.ads1115_service:
             status['adc'] = await self.ads1115_service.get_status()
         
-        if self.csv_logger:
-            status['csv'] = await self.csv_logger.get_status()
+        if self.http_sender:
+            status['http'] = await self.http_sender.get_status()
         
         return status
     
@@ -350,8 +330,8 @@ class FuseMonitorService:
             await self.stop_monitoring()
             
             # Cleanup services
-            if self.csv_logger:
-                await self.csv_logger.cleanup()
+            if self.http_sender:
+                await self.http_sender.cleanup()
             
             if self.ads1115_service:
                 await self.ads1115_service.cleanup()

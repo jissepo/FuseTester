@@ -17,7 +17,7 @@ This is a Python I2C data collection and CSV logging application designed to run
 - **Runtime**: Python 3.9+ (pre-installed on Pi OS)
 - **Package Manager**: pip3
 - **Architecture**: ARM6 compatible packages only
-- **Data Storage**: CSV files (no database)
+- **Data Storage**: HTTP POST to external server (no local files)
 - **Configuration**: .env files only (no JSON config files)
 
 ## Project Structure
@@ -32,9 +32,8 @@ FuseTester/
 │       ├── i2c_service.py          # I2C communication service
 │       ├── gpio_service.py         # GPIO multiplexer control
 │       ├── ads1115_service.py      # ADS1115 ADC interface
-│       ├── csv_logger.py           # CSV data logging
+│       ├── csv_logger.py           # HTTP data transmission service
 │       └── fuse_monitor_service.py # Main monitoring coordinator
-├── data/                           # CSV data files directory
 ├── docs/
 │   ├── README.md
 │   └── SETUP.md                    # Pi setup instructions
