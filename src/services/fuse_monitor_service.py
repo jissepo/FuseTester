@@ -58,7 +58,7 @@ class FuseMonitorService:
             await self.ads1115_service.initialize()
             
             # Set appropriate gain for fuse monitoring (typically 0-5V)
-            self.ads1115_service.set_gain('6.144V')  # +/-6.144V range for 0-5V fuse signals
+            self.ads1115_service.set_gain('4.096V')  # +/-4.096V range for 0-5V fuse signals
             logger.info("ADS1115 ADC ready")
             
             # Initialize HTTP data sender
@@ -136,7 +136,7 @@ class FuseMonitorService:
             # Overall test result
             test_results['overall'] = (test_results['gpio'] and 
                                      test_results['adc'] and 
-                                     test_results['csv'])
+                                     test_results['http'])
             
             logger.info(f"System test complete. Overall result: {test_results['overall']}")
             return test_results
