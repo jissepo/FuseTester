@@ -158,7 +158,7 @@ class HTTPDataSender:
             
             # Log the payload being sent
             logger.info(f"Sending HTTP payload to {self.server_url}")
-            logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
+            logger.info(f"Payload: {json.dumps(payload, indent=2)}")
             
             headers = self._get_headers()
             
