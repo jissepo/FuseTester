@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 # ADS1115 I2C address (default)
 ADS1115_ADDRESS = 0x48
 
-# Gain settings for different voltage ranges
+# Gain settings for different voltage ranges (using raw gain values)
 GAIN_SETTINGS = {
-    '6.144V': ADS.Gain.TWOTHIRDS,  # +/-6.144V range
-    '4.096V': ADS.Gain.ONE,        # +/-4.096V range  
-    '2.048V': ADS.Gain.TWO,        # +/-2.048V range
-    '1.024V': ADS.Gain.FOUR,       # +/-1.024V range
-    '0.512V': ADS.Gain.EIGHT,      # +/-0.512V range
-    '0.256V': ADS.Gain.SIXTEEN     # +/-0.256V range
+    '6.144V': 2/3,  # +/-6.144V range (TWOTHIRDS)
+    '4.096V': 1,    # +/-4.096V range (ONE)
+    '2.048V': 2,    # +/-2.048V range (TWO)
+    '1.024V': 4,    # +/-1.024V range (FOUR)
+    '0.512V': 8,    # +/-0.512V range (EIGHT)
+    '0.256V': 16    # +/-0.256V range (SIXTEEN)
 }
 
 class ADS1115Service:
@@ -35,7 +35,7 @@ class ADS1115Service:
         self.initialized = False
         self.ads: Optional[ADS.ADS1115] = None
         self.i2c: Optional[busio.I2C] = None
-        self.current_gain = ADS.Gain.ONE  # Default to +/-4.096V range
+        self.current_gain = 1  # Default to +/-4.096V range (ONE)
         self.channels: Dict[int, AnalogIn] = {}
     
     async def initialize(self):
@@ -108,9 +108,9 @@ class ADS1115Service:
             raise
     
     def _gain_to_voltage_range(self, gain) -> str:
-        """Convert gain enum to voltage range string"""
-        for voltage_range, gain_enum in GAIN_SETTINGS.items():
-            if gain_enum == gain:
+        """Convert gain value to voltage range string"""
+        for voltage_range, gain_value in GAIN_SETTINGS.items():
+            if gain_value == gain:
                 return voltage_range
         return "unknown"
     
