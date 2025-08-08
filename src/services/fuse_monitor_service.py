@@ -12,7 +12,7 @@ from datetime import datetime
 
 from .gpio_service import GPIOService
 from .ads1115_service import ADS1115Service
-from .csv_logger import HTTPDataSender
+from .http_data_sender import HTTPDataSender
 
 logger = logging.getLogger(__name__)
 
