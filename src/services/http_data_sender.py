@@ -156,6 +156,10 @@ class HTTPDataSender:
             if not self.server_url:
                 return False
             
+            # Log the payload being sent
+            logger.info(f"Sending HTTP payload to {self.server_url}")
+            logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
+            
             headers = self._get_headers()
             
             # Use requests in thread pool
@@ -171,6 +175,7 @@ class HTTPDataSender:
             )
             
             if response.status_code < 300:
+                logger.info(f"✓ HTTP request successful (status: {response.status_code})")
                 return True
             else:
                 logger.warning(f"Server returned status {response.status_code}: {response.text}")
