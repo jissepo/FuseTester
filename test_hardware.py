@@ -17,16 +17,12 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
 
 # Add src directory to path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
 from services.gpio_service import GPIOService
 from services.ads1115_service import ADS1115Service
-
-# Load environment variables
-load_dotenv()
 
 # Configure logging
 logging.basicConfig(
