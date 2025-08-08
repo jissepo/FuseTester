@@ -80,6 +80,10 @@ class HardwareTester:
         try:
             logger.info(f"Testing ADC channel {adc_channel}, MUX input {mux_input}")
             
+            # First, disable all multiplexers to ensure clean state
+            await self.gpio_service.disable_all_muxes()
+            logger.debug("✓ All MUXes disabled")
+            
             # Calculate which multiplexer this corresponds to
             # ADC0->MUX0, ADC1->MUX1, ADC2->MUX2, ADC3->MUX3
             mux_number = adc_channel
@@ -162,6 +166,15 @@ class HardwareTester:
     
     async def cleanup(self):
         """Cleanup hardware services"""
+        try:
+            # Disable all muxes before cleanup
+            if self.gpio_service and self.initialized:
+                logger.info("Disabling all multiplexers...")
+                await self.gpio_service.disable_all_muxes()
+                logger.info("✓ All multiplexers disabled")
+        except Exception as e:
+            logger.warning(f"Error disabling muxes during cleanup: {e}")
+        
         if self.gpio_service:
             await self.gpio_service.cleanup()
         if self.ads1115_service:
@@ -184,12 +197,13 @@ async def interactive_test():
         print("  2. Test all ADC channels (same MUX input)")
         print("  3. Test all MUX inputs (same ADC channel)")
         print("  4. Continuous monitoring")
+        print("  5. Disable all multiplexers")
         print("  q. Quit")
         print()
         
         while True:
             try:
-                choice = input("Enter command (1-4, q): ").strip().lower()
+                choice = input("Enter command (1-5, q): ").strip().lower()
                 
                 if choice == 'q':
                     break
@@ -248,6 +262,16 @@ async def interactive_test():
                             await asyncio.sleep(interval)
                     except KeyboardInterrupt:
                         print("\n⏹️ Monitoring stopped")
+                    
+                elif choice == '5':
+                    print("🔌 Disabling all multiplexers...")
+                    try:
+                        await tester.gpio_service.disable_all_muxes()
+                        print("✓ All multiplexers disabled successfully")
+                        print("   All MUX enable pins set to LOW")
+                        print("   Hardware is now in safe state")
+                    except Exception as e:
+                        print(f"❌ Error disabling multiplexers: {e}")
                     
                 else:
                     print("❌ Invalid choice")
