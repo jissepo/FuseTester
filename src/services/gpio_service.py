@@ -86,14 +86,17 @@ class GPIOService:
             raise ValueError("Channel must be 0-15")
         
         try:
-            # Convert channel to binary and set S0, S1, S2, S3 pins
-            GPIO.output(MUX_CONTROL_PINS['S0'], channel & 0x01)
-            GPIO.output(MUX_CONTROL_PINS['S1'], (channel & 0x02) >> 1)
-            GPIO.output(MUX_CONTROL_PINS['S2'], (channel & 0x04) >> 2)
-            GPIO.output(MUX_CONTROL_PINS['S3'], (channel & 0x08) >> 3)
+            # Invert channel mapping: 0->15, 1->14, 2->13, ..., 15->0
+            inverted_channel = 15 - channel
             
-            self.current_channel = channel
-            logger.debug(f"Set multiplexer channel to {channel}")
+            # Convert inverted channel to binary and set S0, S1, S2, S3 pins
+            GPIO.output(MUX_CONTROL_PINS['S0'], inverted_channel & 0x01)
+            GPIO.output(MUX_CONTROL_PINS['S1'], (inverted_channel & 0x02) >> 1)
+            GPIO.output(MUX_CONTROL_PINS['S2'], (inverted_channel & 0x04) >> 2)
+            GPIO.output(MUX_CONTROL_PINS['S3'], (inverted_channel & 0x08) >> 3)
+            
+            self.current_channel = channel  # Store the requested channel, not the inverted one
+            logger.debug(f"Set multiplexer channel {channel} -> hardware channel {inverted_channel}")
             
             # Small settling delay for multiplexer switching
             await asyncio.sleep(0.001)
