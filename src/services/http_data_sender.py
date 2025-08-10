@@ -116,11 +116,30 @@ class HTTPDataSender:
         if not self.initialized:
             raise RuntimeError("HTTP Data Sender not initialized")
         
+        # Process fuse data to separate battery and exclude ground
+        processed_readings = {}
+        battery_voltage = None
+        
+        for fuse_num, voltage in fuse_data.items():
+            if fuse_num == 16:
+                # Fuse 16 (MUX 0, Channel 15->0 inverted) is ground connection - skip
+                logger.debug(f"Skipping ground connection: Fuse {fuse_num} = {voltage:.4f}V")
+                continue
+            elif fuse_num == 15:
+                # Fuse 15 (MUX 0, Channel 14->1 inverted) is battery voltage
+                battery_voltage = voltage
+                logger.debug(f"Battery voltage: {voltage:.4f}V")
+                continue
+            else:
+                # Regular fuse reading
+                processed_readings[fuse_num] = voltage
+        
         # Create data payload
         payload = {
             'timestamp': datetime.now().isoformat(),
             'device_id': os.getenv('DEVICE_ID', 'fusetester-001'),
-            'readings': fuse_data,
+            'readings': processed_readings,
+            'battery': battery_voltage,
             'system_info': await self._get_system_info()
         }
         
@@ -136,7 +155,9 @@ class HTTPDataSender:
                     # Try to send any buffered data
                     await self._send_buffered_data()
                     
-                    logger.debug(f"Successfully sent fuse data ({len(fuse_data)} readings)")
+                    fuse_count = len(processed_readings)
+                    battery_info = f", battery: {battery_voltage:.4f}V" if battery_voltage is not None else ""
+                    logger.debug(f"Successfully sent data ({fuse_count} fuse readings{battery_info})")
                 else:
                     # Add to buffer for retry
                     await self._buffer_data(payload)
