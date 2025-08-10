@@ -273,19 +273,24 @@ class FuseMonitorService:
             raise ValueError(f"Fuse number must be 1-{self.total_fuses}")
         
         try:
+            # Calculate which mux and channel this fuse corresponds to
+            fuse_index = fuse_number - 1
+            mux_index = fuse_index // self.channels_per_mux  # 0-3 for MUX0-MUX3
+            channel = fuse_index % self.channels_per_mux    # 0-15 for channels
+            
             # Select the appropriate multiplexer and channel
             await self.gpio_service.select_fuse(fuse_number)
             
             # Small settling delay for multiplexer switching
-            await asyncio.sleep(0.005)
+            await asyncio.sleep(0.1)
             
-            # Read from ADC channel 0 (all mux outputs go to AIN0)
-            voltage = await self.ads1115_service.read_channel(0)
+            # Read from the appropriate ADC channel based on MUX
+            # MUX 0 -> AIN0, MUX 1 -> AIN1, MUX 2 -> AIN2, MUX 3 -> AIN3
+            voltage = await self.ads1115_service.read_channel(mux_index)
             
             # Update tracking variables
-            fuse_index = fuse_number - 1
-            self.current_mux = fuse_index // self.channels_per_mux
-            self.current_channel = fuse_index % self.channels_per_mux
+            self.current_mux = mux_index
+            self.current_channel = channel
             
             return voltage
             
