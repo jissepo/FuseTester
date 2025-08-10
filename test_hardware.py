@@ -81,7 +81,7 @@ class HardwareTester:
             logger.info(f"Testing ADC channel {adc_channel}, MUX input {mux_input}")
             
             # First, disable all multiplexers to ensure clean state
-            await self.gpio_service.disable_all_muxes()
+            await self.gpio_service.disable_all_mux()
             logger.debug("✓ All MUXes disabled")
             
             # Calculate which multiplexer this corresponds to
@@ -170,7 +170,7 @@ class HardwareTester:
             # Disable all muxes before cleanup
             if self.gpio_service and self.initialized:
                 logger.info("Disabling all multiplexers...")
-                await self.gpio_service.disable_all_muxes()
+                await self.gpio_service.disable_all_mux()
                 logger.info("✓ All multiplexers disabled")
         except Exception as e:
             logger.warning(f"Error disabling muxes during cleanup: {e}")
@@ -266,7 +266,7 @@ async def interactive_test():
                 elif choice == '5':
                     print("🔌 Disabling all multiplexers...")
                     try:
-                        await tester.gpio_service.disable_all_muxes()
+                        await tester.gpio_service.disable_all_mux()
                         print("✓ All multiplexers disabled successfully")
                         print("   All MUX enable pins set to LOW")
                         print("   Hardware is now in safe state")
