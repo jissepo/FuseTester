@@ -121,12 +121,12 @@ class HTTPDataSender:
         battery_voltage = None
         
         for fuse_num, voltage in fuse_data.items():
-            if fuse_num == 16:
-                # Fuse 16 (MUX 0, Channel 15->0 inverted) is ground connection - skip
+            if fuse_num == 0:
+                # Fuse 0 (MUX 0, Channel 15->0 inverted) is ground connection - skip
                 logger.debug(f"Skipping ground connection: Fuse {fuse_num} = {voltage:.4f}V")
                 continue
-            elif fuse_num == 15:
-                # Fuse 15 (MUX 0, Channel 14->1 inverted) is battery voltage
+            elif fuse_num == 1:
+                # Fuse 1 (MUX 0, Channel 14->1 inverted) is battery voltage
                 battery_voltage = voltage
                 logger.debug(f"Battery voltage: {voltage:.4f}V")
                 continue
