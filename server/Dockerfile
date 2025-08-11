@@ -17,8 +17,12 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy application code
 COPY . .
 
-# Change ownership to app user
-RUN chown -R fusetester:nodejs /app
+# Create data directory with proper permissions
+RUN mkdir -p /app/data && \
+  chown -R fusetester:nodejs /app && \
+  chmod -R 755 /app && \
+  chmod -R 777 /app/data
+
 USER fusetester
 
 # Expose port

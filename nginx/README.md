@@ -29,24 +29,18 @@ This directory contains nginx configuration files for serving the FuseTester app
 
 ## Installation
 
-1. **Copy configuration files to nginx sites-available:**
+1. **Copy configuration files to nginx conf.d directory:**
    ```bash
-   sudo cp client.conf /etc/nginx/sites-available/carbot.joeleht.dev
-   sudo cp api.conf /etc/nginx/sites-available/api.carbot.joeleht.dev
+   sudo cp client.conf /etc/nginx/conf.d/carbot.joeleht.dev.conf
+   sudo cp api.conf /etc/nginx/conf.d/api.carbot.joeleht.dev.conf
    ```
 
-2. **Enable the sites:**
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/carbot.joeleht.dev /etc/nginx/sites-enabled/
-   sudo ln -s /etc/nginx/sites-available/api.carbot.joeleht.dev /etc/nginx/sites-enabled/
-   ```
-
-3. **Test nginx configuration:**
+2. **Test nginx configuration:**
    ```bash
    sudo nginx -t
    ```
 
-4. **Reload nginx:**
+3. **Reload nginx:**
    ```bash
    sudo systemctl reload nginx
    ```
@@ -96,6 +90,10 @@ sudo chmod -R 755 /app/fusetester/client
 ```bash
 # Navigate to server directory
 cd /app/fusetester/server
+
+# Create data directory with proper permissions
+mkdir -p data
+chmod 777 data
 
 # Build and start the Docker container
 docker-compose up -d
@@ -252,4 +250,12 @@ sudo systemctl status fusetester-api
 5. **Check SSL certificates:**
    ```bash
    sudo certbot certificates
+   ```
+
+6. **Fix database permissions (if needed):**
+   ```bash
+   cd /app/fusetester/server
+   mkdir -p data
+   chmod 777 data
+   docker-compose restart fusetester-api
    ```

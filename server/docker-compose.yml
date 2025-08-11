@@ -15,6 +15,9 @@ services:
     volumes:
       # Mount database directory to persist data
       - ./data:/app/data
+      # Ensure the data directory exists on host
+    tmpfs:
+      - /tmp
     networks:
       - fusetester-network
     healthcheck:

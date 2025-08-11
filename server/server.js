@@ -16,6 +16,18 @@ if (!fs.existsSync(dataDir)) {
 
 const DB_PATH = path.join(dataDir, "fusetester.db");
 
+// Ensure data directory has correct permissions
+try {
+  fs.accessSync(dataDir, fs.constants.W_OK);
+  console.log(`Data directory accessible: ${dataDir}`);
+} catch (err) {
+  console.error(`Data directory not writable: ${dataDir}`);
+  console.error(`Error: ${err.message}`);
+  process.exit(1);
+}
+
+console.log(`Database path: ${DB_PATH}`);
+
 // Middleware
 app.use(helmet());
 app.use(cors());
