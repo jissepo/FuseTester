@@ -135,7 +135,14 @@ app.post("/data", async (req, res) => {
 
     db.run(
       insertReading,
-      [normalizedTimestamp, device_id, battery, memoryPercent, cpuTemp, uptimeSeconds],
+      [
+        normalizedTimestamp,
+        device_id,
+        battery,
+        memoryPercent,
+        cpuTemp,
+        uptimeSeconds,
+      ],
       function (err) {
         if (err) {
           console.error("Database error:", err.message);
@@ -206,7 +213,7 @@ app.get("/data", (req, res) => {
     }
 
     if (end) {
-      // Normalize end time for comparison  
+      // Normalize end time for comparison
       const endDate = new Date(end);
       const normalizedEnd = endDate.toISOString();
       conditions.push("datetime(r.timestamp) <= datetime(?)");

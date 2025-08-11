@@ -515,9 +515,16 @@
 
         // Build query parameters
         const params = new URLSearchParams();
-        if (startDate)
-          params.append("start", new Date(startDate).toISOString());
-        if (endDate) params.append("end", new Date(endDate).toISOString());
+        if (startDate) {
+          // Treat datetime-local input as already in the intended timezone
+          // Append 'Z' to treat it as UTC (what user actually means)
+          const startISO = startDate + ":00.000Z";
+          params.append("start", startISO);
+        }
+        if (endDate) {
+          const endISO = endDate + ":00.000Z";
+          params.append("end", endISO);
+        }
         if (deviceId) params.append("device_id", deviceId);
 
         const response = await fetch(`${serverUrl}/data?${params}`);
@@ -591,9 +598,14 @@
         try {
           // Build query parameters
           const params = new URLSearchParams();
-          if (startDate)
-            params.append("start", new Date(startDate).toISOString());
-          if (endDate) params.append("end", new Date(endDate).toISOString());
+          if (startDate) {
+            const startISO = startDate + ":00.000Z";
+            params.append("start", startISO);
+          }
+          if (endDate) {
+            const endISO = endDate + ":00.000Z";
+            params.append("end", endISO);
+          }
           if (deviceId) params.append("device_id", deviceId);
 
           const response = await fetch(`${serverUrl}/data?${params}`);
