@@ -287,7 +287,7 @@ async def interactive_test():
                 logger.error(f"Test error: {e}")
     
     finally:
-        await tester.cleanup()
+        # await tester.cleanup()
 
 async def main():
     """Main entry point"""
