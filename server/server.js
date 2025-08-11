@@ -174,6 +174,7 @@ app.post("/data", async (req, res) => {
 app.get("/data", (req, res) => {
   try {
     const { start, end, device_id } = req.query;
+    console.log(`GET /data request - Query params:`, { start, end, device_id });
 
     // Build query conditions
     let conditions = [];
@@ -197,6 +198,11 @@ app.get("/data", (req, res) => {
     const whereClause =
       conditions.length > 0 ? "WHERE " + conditions.join(" AND ") : "";
 
+    console.log(
+      `Database query conditions: ${conditions.length} filters applied`
+    );
+    console.log(`Query parameters:`, params);
+
     // Query with joins to get complete data
     const query = `
             SELECT 
@@ -219,11 +225,22 @@ app.get("/data", (req, res) => {
             LIMIT 1000
         `;
 
+    console.log(`Executing query with ${params.length} parameters`);
+    const queryStart = Date.now();
+
     db.all(query, params, (err, rows) => {
+      const queryDuration = Date.now() - queryStart;
+
       if (err) {
-        console.error("Query error:", err.message);
+        console.error(`Query failed after ${queryDuration}ms:`, err.message);
+        console.error(`Failed query:`, query);
+        console.error(`Query params:`, params);
         return res.status(500).json({ error: "Database query error" });
       }
+
+      console.log(
+        `Query completed in ${queryDuration}ms, returned ${rows.length} rows`
+      );
 
       // Process results to structure fuse data properly
       const results = rows.map((row) => {
@@ -250,6 +267,17 @@ app.get("/data", (req, res) => {
           fuse_readings: fuseReadings,
         };
       });
+
+      console.log(`Processed ${results.length} readings for response`);
+      if (results.length > 0) {
+        console.log(
+          `Date range: ${results[results.length - 1].timestamp} to ${
+            results[0].timestamp
+          }`
+        );
+        const deviceIds = [...new Set(results.map((r) => r.device_id))];
+        console.log(`Devices in results: ${deviceIds.join(", ")}`);
+      }
 
       res.json({
         success: true,
