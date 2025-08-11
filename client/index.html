@@ -299,12 +299,8 @@
         <div class="value" id="totalReadings">-</div>
       </div>
       <div class="stat-card">
-        <h3>Data Points</h3>
-        <div class="value" id="dataPoints">-</div>
-      </div>
-      <div class="stat-card">
-        <h3>Avg Battery</h3>
-        <div class="value" id="avgBattery">- V</div>
+        <h3>Current Battery</h3>
+        <div class="value" id="currentBattery">- V</div>
       </div>
       <div class="stat-card">
         <h3>Time Range</h3>
@@ -325,6 +321,12 @@
       let isAutoRefreshEnabled = false;
       let lastRefreshTime = null;
 
+      // Voltage conversion function (raw value is 24.8125% of real value)
+      function convertVoltage(rawVoltage) {
+        if (rawVoltage === null || rawVoltage === undefined) return null;
+        return rawVoltage / 0.248125; // Convert to real voltage
+      }
+
       // Initialize the page
       document.addEventListener("DOMContentLoaded", function () {
         initializeFuseSelector();
@@ -335,6 +337,15 @@
 
       function initializeFuseSelector() {
         const container = document.getElementById("fuseCheckboxes");
+
+        // Add battery option first
+        const batteryCheckbox = document.createElement("div");
+        batteryCheckbox.className = "fuse-checkbox";
+        batteryCheckbox.innerHTML = `
+                    <input type="checkbox" id="battery" value="battery">
+                    <label for="battery" style="font-weight: bold; color: #2196F3;">Battery</label>
+                `;
+        container.appendChild(batteryCheckbox);
 
         // Generate checkboxes for fuses 3-64 (excluding ground=1, battery=2)
         for (let i = 3; i <= 64; i++) {
@@ -649,15 +660,21 @@
           return;
         }
 
-        // Get selected fuses
-        const selectedFuses = [];
+        // Get selected items (fuses and/or battery)
+        const selectedItems = [];
         const checkboxes = document.querySelectorAll(
           '#fuseCheckboxes input[type="checkbox"]:checked'
         );
-        checkboxes.forEach((cb) => selectedFuses.push(parseInt(cb.value)));
+        checkboxes.forEach((cb) => {
+          if (cb.value === "battery") {
+            selectedItems.push("battery");
+          } else {
+            selectedItems.push(parseInt(cb.value));
+          }
+        });
 
-        if (selectedFuses.length === 0) {
-          showMessage("Please select at least one fuse to display", "error");
+        if (selectedItems.length === 0) {
+          showMessage("Please select at least one item to display", "error");
           return;
         }
 
@@ -670,16 +687,30 @@
         });
         const datasets = [];
 
-        // Generate colors for each fuse
-        const colors = generateColors(selectedFuses.length);
+        // Generate colors for each item
+        const colors = generateColors(selectedItems.length);
 
-        selectedFuses.forEach((fuseNum, index) => {
-          const data = currentData.map((reading) => {
-            return reading.fuse_readings[fuseNum] || null;
-          });
+        selectedItems.forEach((item, index) => {
+          let data, label;
+
+          if (item === "battery") {
+            // Battery data with voltage conversion
+            data = currentData.map((reading) => {
+              const rawVoltage = reading.battery_voltage;
+              return convertVoltage(rawVoltage);
+            });
+            label = "Battery";
+          } else {
+            // Fuse data with voltage conversion
+            data = currentData.map((reading) => {
+              const rawVoltage = reading.fuse_readings[item];
+              return rawVoltage !== null ? convertVoltage(rawVoltage) : null;
+            });
+            label = `Fuse ${item}`;
+          }
 
           datasets.push({
-            label: `Fuse ${fuseNum}`,
+            label: label,
             data: data,
             borderColor: colors[index],
             backgroundColor: colors[index] + "20",
@@ -744,22 +775,15 @@
         const statsContainer = document.getElementById("statsContainer");
 
         document.getElementById("totalReadings").textContent = result.count;
-        document.getElementById("dataPoints").textContent =
-          result.count *
-          Object.keys(result.data[0]?.fuse_readings || {}).length;
 
-        // Calculate average battery voltage
-        const batteryVoltages = result.data
-          .map((r) => r.battery_voltage)
-          .filter((v) => v != null);
-        const avgBattery =
-          batteryVoltages.length > 0
-            ? (
-                batteryVoltages.reduce((a, b) => a + b, 0) /
-                batteryVoltages.length
-              ).toFixed(2)
+        // Get current (latest) battery voltage and convert to real voltage
+        const currentBatteryRaw = result.data[0]?.battery_voltage;
+        const currentBattery =
+          currentBatteryRaw !== null
+            ? convertVoltage(currentBatteryRaw).toFixed(2)
             : "N/A";
-        document.getElementById("avgBattery").textContent = avgBattery + " V";
+        document.getElementById("currentBattery").textContent =
+          currentBattery + " V";
 
         // Time range
         if (result.data.length > 0) {
