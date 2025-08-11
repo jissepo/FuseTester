@@ -213,12 +213,14 @@ app.get("/data", (req, res) => {
     }
 
     if (end) {
-      // Normalize end time for comparison
+      // Normalize end time for comparison and add 1-minute buffer
       const endDate = new Date(end);
+      // Add 1 minute to account for timing differences
+      endDate.setMinutes(endDate.getMinutes() + 1);
       const normalizedEnd = endDate.toISOString();
       conditions.push("datetime(r.timestamp) <= datetime(?)");
       params.push(normalizedEnd);
-      console.log(`End filter: ${end} -> ${normalizedEnd}`);
+      console.log(`End filter: ${end} -> ${normalizedEnd} (added 1min buffer)`);
     }
 
     if (device_id) {

@@ -662,9 +662,12 @@
         }
 
         // Prepare chart data
-        const labels = currentData.map((reading) =>
-          new Date(reading.timestamp).toLocaleString()
-        );
+        const labels = currentData.map((reading) => {
+          // Since we now send timestamps as UTC matching user intent,
+          // display them as UTC time (no timezone conversion)
+          const date = new Date(reading.timestamp);
+          return date.toISOString().slice(0, 19).replace("T", " "); // Format: "2025-08-11 16:19:42"
+        });
         const datasets = [];
 
         // Generate colors for each fuse
