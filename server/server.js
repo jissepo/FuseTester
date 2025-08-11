@@ -18,6 +18,8 @@ const DB_PATH = path.join(dataDir, "fusetester.db");
 
 // Ensure data directory has correct permissions
 try {
+  console.log(`Checking data directory permissions: ${dataDir}`);
+
   fs.accessSync(dataDir, fs.constants.W_OK);
   console.log(`Data directory accessible: ${dataDir}`);
 } catch (err) {
