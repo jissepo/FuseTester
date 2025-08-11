@@ -185,107 +185,107 @@ async def interactive_test():
     """Interactive testing mode"""
     tester = HardwareTester()
     
-    try:
-        await tester.initialize()
-        
-        print("\n" + "="*60)
-        print("🔧 FuseTester Hardware Test Utility")
-        print("="*60)
-        print()
-        print("Available commands:")
-        print("  1. Test specific ADC channel + MUX input")
-        print("  2. Test all ADC channels (same MUX input)")
-        print("  3. Test all MUX inputs (same ADC channel)")
-        print("  4. Continuous monitoring")
-        print("  5. Disable all multiplexers")
-        print("  q. Quit")
-        print()
-        
-        while True:
-            try:
-                choice = input("Enter command (1-5, q): ").strip().lower()
-                
-                if choice == 'q':
-                    break
-                elif choice == '1':
-                    adc_ch = int(input("Enter ADC channel (0-3): "))
-                    mux_in = int(input("Enter MUX input (0-15): "))
-                    
-                    if not (0 <= adc_ch <= 3):
-                        print("❌ ADC channel must be 0-3")
-                        continue
-                    if not (0 <= mux_in <= 15):
-                        print("❌ MUX input must be 0-15")
-                        continue
-                    
-                    await tester.test_specific_input(adc_ch, mux_in)
-                    
-                elif choice == '2':
-                    mux_in = int(input("Enter MUX input (0-15): "))
-                    if not (0 <= mux_in <= 15):
-                        print("❌ MUX input must be 0-15")
-                        continue
-                    
-                    results = await tester.test_all_adc_channels(mux_in)
-                    print(f"\n📊 Summary for MUX input {mux_in}:")
-                    for r in results:
-                        print(f"   ADC{r['adc_channel']} (Fuse {r['fuse_number']}): {r['voltage']:.4f}V")
-                    
-                elif choice == '3':
-                    adc_ch = int(input("Enter ADC channel (0-3): "))
-                    if not (0 <= adc_ch <= 3):
-                        print("❌ ADC channel must be 0-3")
-                        continue
-                    
-                    results = await tester.test_mux_sweep(adc_ch)
-                    print(f"\n📊 Summary for ADC channel {adc_ch}:")
-                    for r in results:
-                        print(f"   MUX{r['mux_input']:2d} (Fuse {r['fuse_number']}): {r['voltage']:.4f}V")
-                    
-                elif choice == '4':
-                    adc_ch = int(input("Enter ADC channel (0-3): "))
-                    mux_in = int(input("Enter MUX input (0-15): "))
-                    interval = float(input("Enter interval in seconds (default 1.0): ") or "1.0")
-                    
-                    if not (0 <= adc_ch <= 3):
-                        print("❌ ADC channel must be 0-3")
-                        continue
-                    if not (0 <= mux_in <= 15):
-                        print("❌ MUX input must be 0-15")
-                        continue
-                    
-                    print(f"\n🔄 Continuous monitoring ADC{adc_ch}, MUX{mux_in} (Press Ctrl+C to stop)")
-                    try:
-                        while True:
-                            result = await tester.test_specific_input(adc_ch, mux_in)
-                            print(f"Fuse {result['fuse_number']}: {result['voltage']:.4f}V")
-                            await asyncio.sleep(interval)
-                    except KeyboardInterrupt:
-                        print("\n⏹️ Monitoring stopped")
-                    
-                elif choice == '5':
-                    print("🔌 Disabling all multiplexers...")
-                    try:
-                        await tester.gpio_service.disable_all_mux()
-                        print("✓ All multiplexers disabled successfully")
-                        print("   All MUX enable pins set to LOW")
-                        print("   Hardware is now in safe state")
-                    except Exception as e:
-                        print(f"❌ Error disabling multiplexers: {e}")
-                    
-                else:
-                    print("❌ Invalid choice")
-                
-                print()
-                
-            except ValueError:
-                print("❌ Please enter valid numbers")
-            except KeyboardInterrupt:
-                print("\n👋 Exiting...")
-                break
-            except Exception as e:
-                logger.error(f"Test error: {e}")
+    # try:
+    await tester.initialize()
     
+    print("\n" + "="*60)
+    print("🔧 FuseTester Hardware Test Utility")
+    print("="*60)
+    print()
+    print("Available commands:")
+    print("  1. Test specific ADC channel + MUX input")
+    print("  2. Test all ADC channels (same MUX input)")
+    print("  3. Test all MUX inputs (same ADC channel)")
+    print("  4. Continuous monitoring")
+    print("  5. Disable all multiplexers")
+    print("  q. Quit")
+    print()
+    
+    while True:
+        try:
+            choice = input("Enter command (1-5, q): ").strip().lower()
+            
+            if choice == 'q':
+                break
+            elif choice == '1':
+                adc_ch = int(input("Enter ADC channel (0-3): "))
+                mux_in = int(input("Enter MUX input (0-15): "))
+                
+                if not (0 <= adc_ch <= 3):
+                    print("❌ ADC channel must be 0-3")
+                    continue
+                if not (0 <= mux_in <= 15):
+                    print("❌ MUX input must be 0-15")
+                    continue
+                
+                await tester.test_specific_input(adc_ch, mux_in)
+                
+            elif choice == '2':
+                mux_in = int(input("Enter MUX input (0-15): "))
+                if not (0 <= mux_in <= 15):
+                    print("❌ MUX input must be 0-15")
+                    continue
+                
+                results = await tester.test_all_adc_channels(mux_in)
+                print(f"\n📊 Summary for MUX input {mux_in}:")
+                for r in results:
+                    print(f"   ADC{r['adc_channel']} (Fuse {r['fuse_number']}): {r['voltage']:.4f}V")
+                
+            elif choice == '3':
+                adc_ch = int(input("Enter ADC channel (0-3): "))
+                if not (0 <= adc_ch <= 3):
+                    print("❌ ADC channel must be 0-3")
+                    continue
+                
+                results = await tester.test_mux_sweep(adc_ch)
+                print(f"\n📊 Summary for ADC channel {adc_ch}:")
+                for r in results:
+                    print(f"   MUX{r['mux_input']:2d} (Fuse {r['fuse_number']}): {r['voltage']:.4f}V")
+                
+            elif choice == '4':
+                adc_ch = int(input("Enter ADC channel (0-3): "))
+                mux_in = int(input("Enter MUX input (0-15): "))
+                interval = float(input("Enter interval in seconds (default 1.0): ") or "1.0")
+                
+                if not (0 <= adc_ch <= 3):
+                    print("❌ ADC channel must be 0-3")
+                    continue
+                if not (0 <= mux_in <= 15):
+                    print("❌ MUX input must be 0-15")
+                    continue
+                
+                print(f"\n🔄 Continuous monitoring ADC{adc_ch}, MUX{mux_in} (Press Ctrl+C to stop)")
+                try:
+                    while True:
+                        result = await tester.test_specific_input(adc_ch, mux_in)
+                        print(f"Fuse {result['fuse_number']}: {result['voltage']:.4f}V")
+                        await asyncio.sleep(interval)
+                except KeyboardInterrupt:
+                    print("\n⏹️ Monitoring stopped")
+                
+            elif choice == '5':
+                print("🔌 Disabling all multiplexers...")
+                try:
+                    await tester.gpio_service.disable_all_mux()
+                    print("✓ All multiplexers disabled successfully")
+                    print("   All MUX enable pins set to LOW")
+                    print("   Hardware is now in safe state")
+                except Exception as e:
+                    print(f"❌ Error disabling multiplexers: {e}")
+                
+            else:
+                print("❌ Invalid choice")
+            
+            print()
+            
+        except ValueError:
+            print("❌ Please enter valid numbers")
+        except KeyboardInterrupt:
+            print("\n👋 Exiting...")
+            break
+        except Exception as e:
+            logger.error(f"Test error: {e}")
+  
     # finally:
         # await tester.cleanup()
 
