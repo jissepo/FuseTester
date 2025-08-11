@@ -298,11 +298,11 @@ async def main():
             mux_in = int(sys.argv[2])
             
             tester = HardwareTester()
-            try:
-                await tester.initialize()
-                await tester.test_specific_input(adc_ch, mux_in)
-            finally:
-                await tester.cleanup()
+            # try:
+            await tester.initialize()
+            await tester.test_specific_input(adc_ch, mux_in)
+            # finally:
+            #     await tester.cleanup()
         else:
             print("Usage: python3 test_hardware.py [adc_channel] [mux_input]")
             print("   Or: python3 test_hardware.py    (for interactive mode)")
