@@ -97,6 +97,22 @@ app.post("/data", async (req, res) => {
   try {
     const { timestamp, device_id, readings, battery, system_info } = req.body;
 
+    console.log(
+      `POST /data - Received timestamp: "${timestamp}" (type: ${typeof timestamp})`
+    );
+
+    // Normalize timestamp to ensure consistent format
+    let normalizedTimestamp;
+    try {
+      // Parse and re-format to ensure ISO format with timezone
+      const date = new Date(timestamp);
+      normalizedTimestamp = date.toISOString();
+      console.log(`Normalized timestamp: "${normalizedTimestamp}"`);
+    } catch (err) {
+      console.error("Invalid timestamp format:", timestamp);
+      return res.status(400).json({ error: "Invalid timestamp format" });
+    }
+
     // Validate required fields
     if (!timestamp || !device_id || !readings) {
       return res.status(400).json({
@@ -119,7 +135,7 @@ app.post("/data", async (req, res) => {
 
     db.run(
       insertReading,
-      [timestamp, device_id, battery, memoryPercent, cpuTemp, uptimeSeconds],
+      [normalizedTimestamp, device_id, battery, memoryPercent, cpuTemp, uptimeSeconds],
       function (err) {
         if (err) {
           console.error("Database error:", err.message);
@@ -181,13 +197,21 @@ app.get("/data", (req, res) => {
     let params = [];
 
     if (start) {
-      conditions.push("r.timestamp >= ?");
-      params.push(start);
+      // Normalize start time for comparison
+      const startDate = new Date(start);
+      const normalizedStart = startDate.toISOString();
+      conditions.push("datetime(r.timestamp) >= datetime(?)");
+      params.push(normalizedStart);
+      console.log(`Start filter: ${start} -> ${normalizedStart}`);
     }
 
     if (end) {
-      conditions.push("r.timestamp <= ?");
-      params.push(end);
+      // Normalize end time for comparison  
+      const endDate = new Date(end);
+      const normalizedEnd = endDate.toISOString();
+      conditions.push("datetime(r.timestamp) <= datetime(?)");
+      params.push(normalizedEnd);
+      console.log(`End filter: ${end} -> ${normalizedEnd}`);
     }
 
     if (device_id) {
@@ -228,6 +252,19 @@ app.get("/data", (req, res) => {
     console.log(`Executing query with ${params.length} parameters`);
     const queryStart = Date.now();
 
+    // Debug: Show recent data in database for comparison
+    db.all(
+      "SELECT timestamp FROM readings ORDER BY created_at DESC LIMIT 5",
+      (debugErr, debugRows) => {
+        if (!debugErr && debugRows.length > 0) {
+          console.log(
+            "Recent timestamps in DB:",
+            debugRows.map((r) => r.timestamp)
+          );
+        }
+      }
+    );
+
     db.all(query, params, (err, rows) => {
       const queryDuration = Date.now() - queryStart;
 
@@ -241,6 +278,26 @@ app.get("/data", (req, res) => {
       console.log(
         `Query completed in ${queryDuration}ms, returned ${rows.length} rows`
       );
+
+      if (rows.length === 0) {
+        console.log("DEBUG: No rows found. Checking total row count...");
+        db.get(
+          "SELECT COUNT(*) as count FROM readings",
+          (countErr, countResult) => {
+            if (!countErr) {
+              console.log(`Total readings in DB: ${countResult.count}`);
+            }
+          }
+        );
+
+        // Check if any data exists in the queried time range
+        const debugQuery = `SELECT COUNT(*) as count, MIN(timestamp) as min_ts, MAX(timestamp) as max_ts FROM readings ${whereClause}`;
+        db.get(debugQuery, params, (debugErr, debugResult) => {
+          if (!debugErr) {
+            console.log("DEBUG - Time range check:", debugResult);
+          }
+        });
+      }
 
       // Process results to structure fuse data properly
       const results = rows.map((row) => {
