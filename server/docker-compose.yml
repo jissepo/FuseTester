@@ -13,9 +13,8 @@ services:
       - NODE_ENV=production
       - PORT=3000
     volumes:
-      # Mount database directory to persist data
-      - ./data:/app/data
-      # Ensure the data directory exists on host
+      # Use named volume for better permission handling
+      - fusetester-data:/app/data
     tmpfs:
       - /tmp
     networks:
