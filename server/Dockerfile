@@ -17,13 +17,16 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy application code
 COPY . .
 
-# Create data directory with proper permissions
+# Create data directory and set permissions before switching user
 RUN mkdir -p /app/data && \
-  chown -R fusetester:nodejs /app && \
-  chmod -R 755 /app && \
-  chmod -R 777 /app/data
+    chown -R fusetester:nodejs /app && \
+    chmod -R 755 /app && \
+    chmod 777 /app/data
 
 USER fusetester
+
+# Create a volume mount point that will be writable
+VOLUME ["/app/data"]
 
 # Expose port
 EXPOSE 3000

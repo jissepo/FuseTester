@@ -96,11 +96,11 @@ mkdir -p data
 chmod 777 data
 
 # Build and start the Docker container
-docker-compose up -d
+docker compose up -d
 
 # Check container status
-docker-compose ps
-docker-compose logs fusetester-api
+docker compose ps
+docker compose logs fusetester-api
 ```
 
 ### Repository Updates
@@ -111,9 +111,9 @@ sudo git pull origin main
 
 # Rebuild and restart Docker container
 cd /app/fusetester/server
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+docker compose down
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ## Docker Service Management
@@ -124,19 +124,19 @@ The API server now runs as a Docker container. Here are the management commands:
 ```bash
 # Start the container
 cd /app/fusetester/server
-docker-compose up -d
+docker compose up -d
 
 # Stop the container
-docker-compose down
+docker compose down
 
 # View logs
-docker-compose logs -f fusetester-api
+docker compose logs -f fusetester-api
 
 # Restart container
-docker-compose restart fusetester-api
+docker compose restart fusetester-api
 
 # Check container health
-docker-compose ps
+docker compose ps
 ```
 
 ### Alternative: Systemd Service (Legacy)
@@ -178,7 +178,7 @@ sudo systemctl status fusetester-api
 ### Docker vs Systemd
 
 **Recommended: Docker** (easier deployment, better isolation, easier updates)
-- Use `docker-compose up -d` to start
+- Use `docker compose up -d` to start
 - Database persisted in `./data` directory
 - Container auto-restarts on failure
 - Easy to update with rebuild
@@ -233,8 +233,8 @@ sudo systemctl status fusetester-api
 
 2. **Check Docker container:**
    ```bash
-   docker-compose ps
-   docker-compose logs fusetester-api
+   docker compose ps
+   docker compose logs fusetester-api
    ```
 
 3. **Test configuration:**
@@ -257,5 +257,5 @@ sudo systemctl status fusetester-api
    cd /app/fusetester/server
    mkdir -p data
    chmod 777 data
-   docker-compose restart fusetester-api
+   docker compose restart fusetester-api
    ```

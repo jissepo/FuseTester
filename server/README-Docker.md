@@ -15,10 +15,10 @@ A containerized Node.js HTTP server for receiving and storing fuse monitoring da
 cd /app/fusetester/server
 
 # Start the container
-docker-compose up -d
+docker compose up -d
 
 # Check status
-docker-compose ps
+docker compose ps
 ```
 
 ## Container Features
@@ -61,31 +61,31 @@ environment:
 ### Basic Operations
 ```bash
 # Start container
-docker-compose up -d
+docker compose up -d
 
 # Stop container
-docker-compose down
+docker compose down
 
 # Restart container
-docker-compose restart fusetester-api
+docker compose restart fusetester-api
 
 # View logs
-docker-compose logs -f fusetester-api
+docker compose logs -f fusetester-api
 
 # Check status and health
-docker-compose ps
+docker compose ps
 ```
 
 ### Development
 ```bash
 # Build without cache
-docker-compose build --no-cache
+docker compose build --no-cache
 
 # View real-time logs
-docker-compose logs -f
+docker compose logs -f
 
 # Execute commands in container
-docker-compose exec fusetester-api sh
+docker compose exec fusetester-api sh
 
 # Check container resource usage
 docker stats fusetester-api
@@ -99,9 +99,9 @@ git pull origin main
 
 # Rebuild and restart
 cd server
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+docker compose down
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ## Monitoring
@@ -139,13 +139,13 @@ docker system prune
 cp /app/fusetester/server/data/fusetester.db /backup/fusetester-$(date +%Y%m%d).db
 
 # Automated backup script
-docker-compose exec fusetester-api sqlite3 /app/data/fusetester.db ".backup /app/data/backup-$(date +%Y%m%d).db"
+docker compose exec fusetester-api sqlite3 /app/data/fusetester.db ".backup /app/data/backup-$(date +%Y%m%d).db"
 ```
 
 ### Access Database
 ```bash
 # Connect to SQLite database
-docker-compose exec fusetester-api sqlite3 /app/data/fusetester.db
+docker compose exec fusetester-api sqlite3 /app/data/fusetester.db
 
 # Or access from host
 sqlite3 /app/fusetester/server/data/fusetester.db
@@ -169,14 +169,14 @@ sqlite3 /app/fusetester/server/data/fusetester.db
 ### Container Won't Start
 ```bash
 # Check logs
-docker-compose logs fusetester-api
+docker compose logs fusetester-api
 
 # Check Docker daemon
 sudo systemctl status docker
 
 # Rebuild container
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ### Database Issues
@@ -185,11 +185,11 @@ docker-compose up -d
 ls -la /app/fusetester/server/data/
 
 # Test database connection
-docker-compose exec fusetester-api sqlite3 /app/data/fusetester.db ".tables"
+docker compose exec fusetester-api sqlite3 /app/data/fusetester.db ".tables"
 
 # Reset database (WARNING: deletes all data)
 rm /app/fusetester/server/data/fusetester.db
-docker-compose restart fusetester-api
+docker compose restart fusetester-api
 ```
 
 ### Performance Issues
@@ -201,9 +201,9 @@ docker stats fusetester-api
 df -h /app/fusetester/server/data/
 
 # Clean up logs
-docker-compose down
+docker compose down
 docker system prune -f
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Port Conflicts
@@ -211,7 +211,7 @@ docker-compose up -d
 # Check what's using port 3000
 sudo lsof -i :3000
 
-# Change port in docker-compose.yml if needed
+# Change port in docker compose.yml if needed
 # ports:
 #   - "127.0.0.1:3001:3000"
 ```
@@ -229,10 +229,10 @@ The Docker container works seamlessly with the nginx configuration:
 ### Development
 ```bash
 # Run with live logs
-docker-compose up
+docker compose up
 
 # Mount source code for development
-# (Add to docker-compose.override.yml)
+# (Add to docker compose.override.yml)
 # volumes:
 #   - .:/app
 ```
@@ -240,7 +240,7 @@ docker-compose up
 ### Production
 ```bash
 # Run in background
-docker-compose up -d
+docker compose up -d
 
 # Enable auto-restart
 # restart: unless-stopped (already configured)
