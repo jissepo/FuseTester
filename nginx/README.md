@@ -31,8 +31,8 @@ This directory contains nginx configuration files for serving the FuseTester app
 
 1. **Copy configuration files to nginx conf.d directory:**
    ```bash
-   sudo cp client.conf /etc/nginx/conf.d/carbot.joeleht.dev.conf
-   sudo cp api.conf /etc/nginx/conf.d/api.carbot.joeleht.dev.conf
+   sudo ln -s /app/fusetester/nginx/client.conf /etc/nginx/conf.d/carbot.joeleht.dev.conf
+   sudo ln -s /app/fusetester/nginx/api.conf /etc/nginx/conf.d/api.carbot.joeleht.dev.conf
    ```
 
 2. **Test nginx configuration:**
