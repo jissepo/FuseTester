@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  fusetester-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: fusetester-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      # Mount database directory to persist data
+      - ./data:/app/data
+    networks:
+      - fusetester-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => { process.exit(1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  fusetester-network:
+    driver: bridge
+
+volumes:
+  fusetester-data:

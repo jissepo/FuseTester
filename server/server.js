@@ -6,7 +6,15 @@ const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_PATH = path.join(__dirname, "fusetester.db");
+
+// Create data directory if it doesn't exist
+const dataDir = path.join(__dirname, "data");
+const fs = require("fs");
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const DB_PATH = path.join(dataDir, "fusetester.db");
 
 // Middleware
 app.use(helmet());

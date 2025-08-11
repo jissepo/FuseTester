@@ -84,10 +84,6 @@ sudo certbot --nginx -d api.carbot.joeleht.dev
 # Clone repository directly to deployment directory
 git clone https://github.com/jissepo/FuseTester.git /app/fusetester
 
-# Install server dependencies
-cd /app/fusetester/server
-sudo npm install --production
-
 # Set permissions
 sudo chown -R www-data:www-data /app/fusetester
 sudo chmod -R 755 /app/fusetester
@@ -96,21 +92,58 @@ sudo chmod -R 755 /app/fusetester
 sudo chmod -R 755 /app/fusetester/client
 ```
 
+### Docker Deployment (Server)
+```bash
+# Navigate to server directory
+cd /app/fusetester/server
+
+# Build and start the Docker container
+docker-compose up -d
+
+# Check container status
+docker-compose ps
+docker-compose logs fusetester-api
+```
+
 ### Repository Updates
 ```bash
 # Update the application
 cd /app/fusetester
 sudo git pull origin main
 
-# Update server dependencies if needed
+# Rebuild and restart Docker container
 cd /app/fusetester/server
-sudo npm install --production
-
-# Restart the API service
-sudo systemctl restart fusetester-api
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
 ```
 
-## Systemd Service
+## Docker Service Management
+
+The API server now runs as a Docker container. Here are the management commands:
+
+### Container Management
+```bash
+# Start the container
+cd /app/fusetester/server
+docker-compose up -d
+
+# Stop the container
+docker-compose down
+
+# View logs
+docker-compose logs -f fusetester-api
+
+# Restart container
+docker-compose restart fusetester-api
+
+# Check container health
+docker-compose ps
+```
+
+### Alternative: Systemd Service (Legacy)
+
+If you prefer to run without Docker, you can still create a systemd service:
 
 Create a systemd service for the Node.js API:
 
@@ -143,6 +176,19 @@ sudo systemctl enable fusetester-api
 sudo systemctl start fusetester-api
 sudo systemctl status fusetester-api
 ```
+
+### Docker vs Systemd
+
+**Recommended: Docker** (easier deployment, better isolation, easier updates)
+- Use `docker-compose up -d` to start
+- Database persisted in `./data` directory
+- Container auto-restarts on failure
+- Easy to update with rebuild
+
+**Alternative: Systemd** (traditional approach)
+- Requires Node.js installed on host
+- Manual dependency management
+- Direct file system access
 
 ## Security Features
 
@@ -187,9 +233,10 @@ sudo systemctl status fusetester-api
    sudo systemctl status nginx
    ```
 
-2. **Check API service:**
+2. **Check Docker container:**
    ```bash
-   sudo systemctl status fusetester-api
+   docker-compose ps
+   docker-compose logs fusetester-api
    ```
 
 3. **Test configuration:**
