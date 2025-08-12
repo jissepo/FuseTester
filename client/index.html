@@ -296,10 +296,70 @@
               Select None
             </button>
             <button
-              onclick="selectCommonFuses()"
-              style="padding: 4px 8px; font-size: 12px"
+              onclick="selectFuseRange(3, 6)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
             >
-              Common (3-20)
+              3-6
+            </button>
+            <button
+              onclick="selectFuseRange(7, 10)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              7-10
+            </button>
+            <button
+              onclick="selectFuseRange(11, 14)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              11-14
+            </button>
+            <button
+              onclick="selectFuseRange(15, 18)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              15-18
+            </button>
+            <button
+              onclick="selectFuseRange(19, 22)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              19-22
+            </button>
+            <button
+              onclick="selectFuseRange(23, 26)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              23-26
+            </button>
+            <button
+              onclick="selectFuseRange(27, 30)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              27-30
+            </button>
+            <button
+              onclick="selectFuseRange(31, 34)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              31-34
+            </button>
+            <button
+              onclick="selectFuseRange(35, 38)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              35-38
+            </button>
+            <button
+              onclick="selectFuseRange(39, 42)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              39 - 42
+            </button>
+            <button
+              onclick="selectFuseRange(43, 46)"
+              style="margin-right: 10px; padding: 4px 8px; font-size: 12px"
+            >
+              43 - 46
             </button>
           </div>
           <div id="fuseCheckboxes">
@@ -403,8 +463,8 @@
           container.appendChild(checkbox);
         }
 
-        // Select first 10 fuses by default
-        selectCommonFuses();
+        // Select first 4 fuses by default (3-6)
+        selectFuseRange(3, 6);
       }
 
       // Update fuse labels when offset changes
@@ -450,6 +510,13 @@
       function selectCommonFuses() {
         selectNoFuses();
         for (let i = 3; i <= 20; i++) {
+          const checkbox = document.getElementById(`fuse${i}`);
+          if (checkbox) checkbox.checked = true;
+        }
+      }
+      function selectFuseRange(start = 3, end = 20) {
+        selectNoFuses();
+        for (let i = start; i <= end; i++) {
           const checkbox = document.getElementById(`fuse${i}`);
           if (checkbox) checkbox.checked = true;
         }
