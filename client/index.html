@@ -246,6 +246,22 @@
       </div>
 
       <div class="control-group">
+        <label for="fuseOffset">Fuse Number Offset:</label>
+        <input
+          type="number"
+          id="fuseOffset"
+          value="0"
+          min="0"
+          max="9999"
+          placeholder="0"
+          title="Add this offset to all displayed fuse numbers"
+        />
+        <small style="color: #666; font-size: 11px">
+          Example: Offset 50 + Fuse 11 = Display "Fuse 61"
+        </small>
+      </div>
+
+      <div class="control-group">
         <button onclick="loadData()" id="loadDataBtn">Load Data</button>
         <button onclick="checkServerHealth()" id="healthBtn">
           Check Server
@@ -327,16 +343,44 @@
         return rawVoltage / 0.248125; // Convert to real voltage
       }
 
+      // Get fuse offset value
+      function getFuseOffset() {
+        const offsetInput = document.getElementById("fuseOffset");
+        const offset = parseInt(offsetInput.value) || 0;
+        return Math.max(0, offset); // Ensure positive number
+      }
+
+      // Format fuse display name with offset
+      function formatFuseName(fuseNumber) {
+        const offset = getFuseOffset();
+        const displayNumber = fuseNumber + offset;
+        return `Fuse ${displayNumber}`;
+      }
+
       // Initialize the page
       document.addEventListener("DOMContentLoaded", function () {
         initializeFuseSelector();
         setDefaultDates();
         setDefaultServerUrl();
         checkServerHealth();
+
+        // Add event listeners for fuse offset changes with debouncing
+        const fuseOffsetInput = document.getElementById("fuseOffset");
+        let offsetTimeout;
+
+        fuseOffsetInput.addEventListener("input", function () {
+          clearTimeout(offsetTimeout);
+          offsetTimeout = setTimeout(updateFuseLabels, 300); // 300ms debounce
+        });
+
+        fuseOffsetInput.addEventListener("change", updateFuseLabels);
       });
 
       function initializeFuseSelector() {
         const container = document.getElementById("fuseCheckboxes");
+
+        // Clear existing content
+        container.innerHTML = "";
 
         // Add battery option first
         const batteryCheckbox = document.createElement("div");
@@ -351,15 +395,42 @@
         for (let i = 3; i <= 64; i++) {
           const checkbox = document.createElement("div");
           checkbox.className = "fuse-checkbox";
+          const displayName = formatFuseName(i);
           checkbox.innerHTML = `
                     <input type="checkbox" id="fuse${i}" value="${i}">
-                    <label for="fuse${i}">Fuse ${i}</label>
+                    <label for="fuse${i}">${displayName}</label>
                 `;
           container.appendChild(checkbox);
         }
 
         // Select first 10 fuses by default
         selectCommonFuses();
+      }
+
+      // Update fuse labels when offset changes
+      function updateFuseLabels() {
+        // Validate and normalize offset input
+        const offsetInput = document.getElementById("fuseOffset");
+        let offset = parseInt(offsetInput.value);
+
+        // Ensure offset is a positive number
+        if (isNaN(offset) || offset < 0) {
+          offset = 0;
+          offsetInput.value = 0;
+        }
+
+        // Update all fuse labels
+        for (let i = 3; i <= 64; i++) {
+          const label = document.querySelector(`label[for="fuse${i}"]`);
+          if (label) {
+            label.textContent = formatFuseName(i);
+          }
+        }
+
+        // Update chart if data is loaded
+        if (currentData.length > 0) {
+          updateChart();
+        }
       }
 
       function selectAllFuses() {
@@ -706,7 +777,7 @@
               const rawVoltage = reading.fuse_readings[item];
               return rawVoltage !== null ? convertVoltage(rawVoltage) : null;
             });
-            label = `Fuse ${item}`;
+            label = formatFuseName(item);
           }
 
           datasets.push({
